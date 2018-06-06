@@ -682,13 +682,21 @@ var IndexExchangeAdapter = function IndexExchangeAdapter() {
         var slotName = usingSizeSpecificSiteID ? String(slotID) : slotID + '_' + sizeID;
         slotIdMap[slotName] = bid;
 
-        // Doesn't need the if(primary_request) conditional since we are using the mergeSlotInto function which is safe
-        cygnus_index_args.slots = mergeSlotInto({
+        newSlot = {
           id: slotName,
           width: size.width,
           height: size.height,
           siteID: siteID || cygnus_index_args.siteID
-        }, cygnus_index_args.slots);
+        };
+
+        if (bid.params.bidFloor && bid.params.bidFloorCur) {
+          newSlot.bidfloor = bid.params.bidFloor;
+          newSlot.bidfloorcur = bidParams.bidFloorCur;
+        }
+
+        // Doesn't need the if(primary_request) conditional since we are using the mergeSlotInto function which is safe
+
+        cygnus_index_args.slots = mergeSlotInto(newSlot, cygnus_index_args.slots);
 
         if (bid.params.tier2SiteID) {
           var tier2SiteID = Number(bid.params.tier2SiteID);
@@ -696,12 +704,9 @@ var IndexExchangeAdapter = function IndexExchangeAdapter() {
             continue;
           }
 
-          cygnus_index_args.slots = mergeSlotInto({
-            id: 'T1_' + slotName,
-            width: size.width,
-            height: size.height,
-            siteID: tier2SiteID
-          }, cygnus_index_args.slots);
+          newSlot.id = 'T1_' + slotName;
+
+          cygnus_index_args.slots = mergeSlotInto(newSlot, cygnus_index_args.slots);
         }
 
         if (bid.params.tier3SiteID) {
@@ -709,13 +714,8 @@ var IndexExchangeAdapter = function IndexExchangeAdapter() {
           if (typeof tier3SiteID !== 'undefined' && !tier3SiteID) {
             continue;
           }
-
-          cygnus_index_args.slots = mergeSlotInto({
-            id: 'T2_' + slotName,
-            width: size.width,
-            height: size.height,
-            siteID: tier3SiteID
-          }, cygnus_index_args.slots);
+          newSlot.id = 'T2_' + slotName;
+          cygnus_index_args.slots = mergeSlotInto(newSlot, cygnus_index_args.slots);
         }
       }
     }
